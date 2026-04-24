@@ -6,14 +6,14 @@ const pool = mysql.createPool({
   password: process.env.MYSQLPASSWORD,
   database: process.env.MYSQLDATABASE,
   port: process.env.MYSQLPORT,
-  waitForConnections: true,
-  connectionLimit: 10,
 });
+
+
 
 (async () => {
   try {
     const conn = await pool.getConnection();
-    console.log("✅ DB Connected");
+    console.log("✅ DB Connected Successfully");
     conn.release();
   } catch (err) {
     console.log("❌ DB ERROR:", err.message);
