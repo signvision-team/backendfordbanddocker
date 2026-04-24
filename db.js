@@ -1,12 +1,12 @@
-// db.js
 const mysql = require('mysql2/promise');
 
 const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: 'admin123', 
-  database: 'SignVision_db',
-  port: 3307, // <--- ADD THIS LINE if your Docker is using 3307
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'admin123',
+  database: process.env.DB_NAME || 'SignVision_db',
+  port: process.env.DB_PORT || 3307,
+
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -14,11 +14,11 @@ const pool = mysql.createPool({
   keepAliveInitialDelay: 0
 });
 
-// Test the connection
+// Test connection
 (async () => {
   try {
     const connection = await pool.getConnection();
-    console.log('✅ Connected to MySQL database on port 3307');
+    console.log('✅ MySQL Connected Successfully');
     connection.release();
   } catch (err) {
     console.error('❌ DB connection error:', err.message);
