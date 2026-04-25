@@ -1,46 +1,15 @@
 {
-
-  
-
-
-
+  "name": "signvision-backend",
+  "version": "1.0.0",
+  "description": "Backend for SignVision project",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
-
-  
-
-
-
-    
-
-
-
-  "cors": "^2.8.6",
-
-  
-
-
-
-    
-
-
-
-  "express": "^5.2.1",
-
-  
-
-
-
-    
-
-
-
-  "mysql2": "^3.16.2"
-
-  
-
-
-
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "mysql2": "^3.16.2"
   }
-
 }
-
