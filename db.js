@@ -1,4 +1,4 @@
-const mysql = require("mysql2/promise");
+import mysql from "mysql2/promise";
 
 const pool = mysql.createPool({
   host: process.env.MYSQLHOST,
@@ -7,8 +7,6 @@ const pool = mysql.createPool({
   database: process.env.MYSQLDATABASE,
   port: process.env.MYSQLPORT,
 });
-
-
 
 (async () => {
   try {
@@ -20,4 +18,4 @@ const pool = mysql.createPool({
   }
 })();
 
-module.exports = pool;
+export default pool;   // ✅ THIS IS THE KEY FIX
