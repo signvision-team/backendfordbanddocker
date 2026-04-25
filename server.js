@@ -1,18 +1,21 @@
-const express = require("express");
-const cors = require("cors");
-const db = require("./db");
+import express from "express";
+import cors from "cors";
+import db from "./db.js";
 
 const app = express();
 
-// ✅ MIDDLEWARE (ONLY ONCE)
+/* ✅ CORS (FIXED) */
 app.use(cors({
     origin: [
         "http://localhost:5173",
         "https://frontend1-f92g4o0nd-wahabullahs-projects.vercel.app"
     ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true
 }));
+
+/* ✅ VERY IMPORTANT (preflight fix) */
+app.options("*", cors());
 
 app.use(express.json());
 
