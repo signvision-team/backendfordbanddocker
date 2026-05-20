@@ -9,6 +9,9 @@ const app = express();
 
 app.use(express.json());
 
+console.log(process.env.DB_USER);
+console.log(process.env.DB_PASSWORD);
+console.log(process.env.DB_NAME);
 // ✅ FIXED CORS (WORKS FOR MOBILE + WEB + VERCEL)
 app.use(cors({
   origin: function (origin, callback) {
