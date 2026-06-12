@@ -3,26 +3,32 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const pool = mysql.createPool({
-  host: "127.0.0.1",
-  user: "root",
-  password: "admin123",
-  database: "SignVision_db",
-  port: 3307,
+console.log({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  database: process.env.DB_NAME,
+});
+
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: Number(process.env.DB_PORT),
+
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  connectTimeout: 10000,
+  enableKeepAlive: true
 });
 
-(async () => {
-  try {
-    const conn = await pool.getConnection();
+db.getConnection()
+  .then((conn) => {
     console.log("✅ DB Connected Successfully");
     conn.release();
-  } catch (err) {
-    console.log("❌ DB ERROR:", err);
-  }
-})();
-
-export default pool;
+  })
+  .catch((err) => {
+    console.error("❌ DB ERROR FULL:", err);
+  });
+export default db;

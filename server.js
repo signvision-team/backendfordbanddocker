@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import db from "./db.js";   // ✅ FIXED (IMPORTANT)
+import db from "./db.js";
 
 dotenv.config();
 
@@ -9,9 +9,6 @@ const app = express();
 
 app.use(express.json());
 
-console.log(process.env.DB_USER);
-console.log(process.env.DB_PASSWORD);
-console.log(process.env.DB_NAME);
 // ✅ FIXED CORS (WORKS FOR MOBILE + WEB + VERCEL)
 app.use(cors({
   origin: function (origin, callback) {
@@ -51,9 +48,14 @@ app.post("/signup", async (req, res) => {
   try {
     const { userType, email, password } = req.body;
 
+    let generatedOrgID = null;
+
     if (userType === "INDIVIDUAL") {
+
       await db.query(
-        "INSERT INTO Individuals (firstName, lastName, phoneNumber, dob, address, email, password) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        `INSERT INTO Individuals
+        (firstName, lastName, phoneNumber, dob, address, email, password)
+        VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
           req.body.firstName,
           req.body.lastName,
@@ -64,11 +66,16 @@ app.post("/signup", async (req, res) => {
           password
         ]
       );
+
     } else {
-      const orgID = req.body.orgID || `SV-${Math.floor(Math.random() * 9000)}`;
+
+      // ✅ ALWAYS GENERATE SERVER SIDE
+      generatedOrgID = `SV-${Date.now().toString().slice(-6)}`;
 
       await db.query(
-        "INSERT INTO Organizations (orgName, contactPerson, contactNumber, address, email, password, orgID) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        `INSERT INTO Organizations
+        (orgName, contactPerson, contactNumber, address, email, password, orgID)
+        VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
           req.body.orgName,
           req.body.contactPerson,
@@ -76,47 +83,89 @@ app.post("/signup", async (req, res) => {
           req.body.address,
           email,
           password,
-          orgID
+          generatedOrgID
         ]
       );
     }
 
-    res.json({ success: true });
+    return res.json({
+      success: true,
+      orgID: generatedOrgID,
+      message: "Signup successful"
+    });
 
   } catch (err) {
+
     console.error("SIGNUP ERROR:", err.message);
-    res.status(500).json({ success: false, message: err.message });
+
+    // ✅ HANDLE DUPLICATE EMAIL PROPERLY
+    if (err.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({
+        success: false,
+        message: "Email already exists"
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 });
 
-/* ---------------- LOGIN ---------------- */
+/* Login */
+
 app.post("/login", async (req, res) => {
+
   console.log("LOGIN DATA:", req.body);
 
-  const { email, password, userType, orgID } = req.body;
+  const { email, password, userType } = req.body;
 
   try {
+
     let query, params;
 
     if (userType === "INDIVIDUAL") {
-      query = "SELECT * FROM Individuals WHERE email = ? AND password = ?";
+
+      query =
+        "SELECT * FROM Individuals WHERE email = ? AND password = ?";
+
       params = [email, password];
+
     } else {
-      query = "SELECT * FROM Organizations WHERE email = ? AND password = ? AND orgID = ?";
-      params = [email, password, orgID];
+
+      query =
+        "SELECT * FROM Organizations WHERE email = ? AND password = ? AND regNumber = ?";
+
+      params = [
+        email,
+        password,
+        req.body.regNumber
+      ];
     }
 
     const [rows] = await db.query(query, params);
 
     if (rows.length > 0) {
-      res.json({ success: true, user: rows[0] });
-    } else {
-      res.status(401).json({ success: false, message: "Invalid credentials" });
+
+      return res.json({
+        success: true,
+        user: rows[0]
+      });
+
     }
 
+    return res.status(401).json({
+      success: false,
+      message: "Invalid credentials"
+    });
+
   } catch (err) {
-    console.error("LOGIN ERROR:", err.message);
-    res.status(500).json({ success: false, message: err.message });
+
+    return res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 });
 
