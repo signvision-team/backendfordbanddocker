@@ -1,5 +1,5 @@
-# Use official Node image
-FROM node:18
+# Use a lightweight official Node image to break the old cache layer
+FROM node:18-alpine
 
 # Create app directory
 WORKDIR /app
@@ -7,10 +7,10 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Install dependencies cleanly
 RUN npm install
 
-# Copy all project files
+# Copy all project files (including your manual CORS server.js!)
 COPY . .
 
 # Expose backend port
