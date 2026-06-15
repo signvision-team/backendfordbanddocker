@@ -113,62 +113,67 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-/* Login */
-
+/* ========================================================
+   LOGIN ROUTE (FIXED DATABASE SCHEMAS & ORG ID VALIDATION)
+   ======================================================== */
 app.post("/login", async (req, res) => {
+  console.log("LOGIN DATA RECEIVED:", req.body);
 
-  console.log("LOGIN DATA:", req.body);
-
-  const { email, password, userType } = req.body;
+  const { email, password, userType, orgID } = req.body;
 
   try {
-
     let query, params;
 
     if (userType === "INDIVIDUAL") {
-
-      query =
-        "SELECT * FROM Individuals WHERE email = ? AND password = ?";
-
+      query = "SELECT * FROM Individuals WHERE email = ? AND password = ?";
       params = [email, password];
-
     } else {
-
-      query =
-        "SELECT * FROM Organizations WHERE email = ? AND password = ? AND regNumber = ?";
-
+      // ✅ FIX: Match the actual table columns ('orgID' instead of 'regNumber')
+      // ✅ REQUIREMENT ENFORCEMENT: Authenticate using the custom corporate code entered into the UI form
+      query = "SELECT * FROM Organizations WHERE email = ? AND password = ? AND orgID = ?";
       params = [
-        email,
-        password,
-        req.body.regNumber
+        email, 
+        password, 
+        orgID ? orgID.trim() : null // Read the exact organization code sent from the frontend
       ];
     }
 
     const [rows] = await db.query(query, params);
 
     if (rows.length > 0) {
+      const matchedUser = rows[0];
+
+      // Clean up sensitive data properties before returning them to client storage
+      delete matchedUser.password;
+
+      // Ensure the structural user wrapper explicitly contains the userType property
+      // so your Frontend React conditional filters don't break down!
+      matchedUser.userType = userType; 
 
       return res.json({
         success: true,
-        user: rows[0]
+        token: `mock-jwt-token-for-${matchedUser.id || matchedUser.orgID}`, // Mock token payload string matching front-end layouts
+        user: matchedUser,
+        orgID: userType === "ORGANIZATION" ? matchedUser.orgID : null
       });
-
     }
 
+    // Explicit fallback rejection path for wrong password or wrong Org ID
     return res.status(401).json({
       success: false,
-      message: "Invalid credentials"
+      message: userType === "ORGANIZATION" 
+        ? "Invalid email, password, or Organization ID." 
+        : "Invalid email or password."
     });
 
   } catch (err) {
-
+    console.error("CRITICAL DATABASE LOGIN CRASH:", err.message);
     return res.status(500).json({
       success: false,
-      message: err.message
+      message: `Database error: ${err.message}`
     });
   }
 });
-
 /* ---------------- START SERVER ---------------- */
 const PORT = process.env.PORT || 5000;
 
