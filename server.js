@@ -1,5 +1,4 @@
 import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
 import db from "./db.js";
 
@@ -7,24 +6,31 @@ dotenv.config();
 
 const app = express();
 
-// ✅ 1. Standard Express JSON parsing middleware
+// ✅ 1. Standard body parser
 app.use(express.json());
 
-// ✅ 2. Universal CORS settings - Automatically handles normal requests + preflights!
-app.use(cors({
-  origin: true, 
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+// ✅ 2. MANUAL HARDCODED CORS MIDDLEWARE (Overrides everything)
+app.use((req, res, next) => {
+  // Echo the requesting origin back or default to allow all
+  const origin = req.headers.origin || "*";
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
 
-// ❌ REMOVED: app.options("/*", cors()); <-- LINE DELETED COMPLETELY TO PREVENT CRASHING
+  // Handle browser OPTIONS Preflight instantly right here
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204); 
+  }
+  next();
+});
 
 /* ---------------- HEALTH CHECK ---------------- */
 app.get("/", (req, res) => {
   res.send("API is running 🚀");
 });
 
+// ... rest of your code (/signup, /login)
 
 // ... rest of your code paths (/signup, /login)
 
