@@ -7,40 +7,25 @@ dotenv.config();
 
 const app = express();
 
-app.use(express.json());
-
-// ✅ FIXED CORS (WORKS FOR MOBILE + WEB + VERCEL)
-// ✅ COMPLETE CORS FIXED CONFIGURATION
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "https://signvision-5mwgcpa5b-wahabullahs-projects.vercel.app" // 🔥 REMOVED THE TRAILING SLASH '/' HERE
-];
-
+// ✅ TEMPORARY CATCH-ALL CORS (Guaranteed to bypass browser checks)
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow all mobile apps + server-to-server + postman
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      // Allows unknown mobile agents, but still secures regular web traffic
-      return callback(null, true); 
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Explicitly list authorized methods
-  allowedHeaders: ["Content-Type", "Authorization"],    // Explicitly allow client headers
-  credentials: true
+  origin: true, // Echoes back whatever origin requested it (Perfect for testing!)
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// 🔥 IMPORTANT PREFLIGHT HANDLING: Intercept OPTIONS method before hitting your custom route rules
+// ✅ Explicit pre-flight handler route
 app.options("*", cors());
+
+app.use(express.json());
 
 /* ---------------- HEALTH CHECK ---------------- */
 app.get("/", (req, res) => {
   res.send("API is running 🚀");
 });
+
+// ... rest of your code (/signup, /login)
 
 /* ---------------- TEST ---------------- */
 app.post("/api/test", (req, res) => {
