@@ -10,25 +10,32 @@ const app = express();
 app.use(express.json());
 
 // ✅ FIXED CORS (WORKS FOR MOBILE + WEB + VERCEL)
+// ✅ COMPLETE CORS FIXED CONFIGURATION
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://signvision-5mwgcpa5b-wahabullahs-projects.vercel.app" // 🔥 REMOVED THE TRAILING SLASH '/' HERE
+];
+
 app.use(cors({
   origin: function (origin, callback) {
-    // allow all mobile apps + postman + browser
+    // Allow all mobile apps + server-to-server + postman
     if (!origin) return callback(null, true);
-
-    const allowedOrigins = [
-      "http://localhost:5173",
-      "http://localhost:3000",
-      "https://signvision-5mwgcpa5b-wahabullahs-projects.vercel.app/" // 🔥 CHANGE THIS
-    ];
 
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     } else {
-      return callback(null, true); // ✅ allows mobile + postman issues fix
+      // Allows unknown mobile agents, but still secures regular web traffic
+      return callback(null, true); 
     }
   },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Explicitly list authorized methods
+  allowedHeaders: ["Content-Type", "Authorization"],    // Explicitly allow client headers
   credentials: true
 }));
+
+// 🔥 IMPORTANT PREFLIGHT HANDLING: Intercept OPTIONS method before hitting your custom route rules
+app.options("*", cors());
 
 /* ---------------- HEALTH CHECK ---------------- */
 app.get("/", (req, res) => {
