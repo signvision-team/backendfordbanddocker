@@ -7,16 +7,16 @@ dotenv.config();
 
 const app = express();
 
-// ✅ TEMPORARY CATCH-ALL CORS (Guaranteed to bypass browser checks)
+// ✅ TEMPORARY CATCH-ALL CORS 
 app.use(cors({
-  origin: true, // Echoes back whatever origin requested it (Perfect for testing!)
+  origin: true, 
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// ✅ Explicit pre-flight handler route
-app.options("*", cors());
+// ✅ FIX: Changed "*" to "/*" to prevent path-to-regexp crash
+app.options("/*", cors());
 
 app.use(express.json());
 
@@ -24,6 +24,8 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("API is running 🚀");
 });
+
+// ... rest of your code paths (/signup, /login)
 
 // ... rest of your code (/signup, /login)
 
