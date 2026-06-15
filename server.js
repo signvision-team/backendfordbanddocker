@@ -7,7 +7,10 @@ dotenv.config();
 
 const app = express();
 
-// ✅ TEMPORARY CATCH-ALL CORS 
+// ✅ 1. Standard Express JSON parsing middleware
+app.use(express.json());
+
+// ✅ 2. Universal CORS settings - Automatically handles normal requests + preflights!
 app.use(cors({
   origin: true, 
   credentials: true,
@@ -15,15 +18,13 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// ✅ FIX: Changed "*" to "/*" to prevent path-to-regexp crash
-app.options("/*", cors());
-
-app.use(express.json());
+// ❌ REMOVED: app.options("/*", cors()); <-- LINE DELETED COMPLETELY TO PREVENT CRASHING
 
 /* ---------------- HEALTH CHECK ---------------- */
 app.get("/", (req, res) => {
   res.send("API is running 🚀");
 });
+
 
 // ... rest of your code paths (/signup, /login)
 
