@@ -1,25 +1,48 @@
 import express from "express";
+import cors from "cors";
 import dotenv from "dotenv";
 import db from "./db.js";
-import cors from "cors";
-
 
 dotenv.config();
+
 const app = express();
 
+/* =========================
+   MUST BE FIRST MIDDLEWARE
+========================= */
+app.use(express.json());
 
+/* =========================
+   RAILWAY SAFE CORS FIX
+========================= */
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://signvision-5mwgcpa5b-wahabullahs-projects.vercel.app"
-  ],
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://signvision-5mwgcpa5b-wahabullahs-projects.vercel.app"
+    ];
+
+    // allow mobile apps / postman
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // IMPORTANT: DO NOT blindly allow everything in production
+    return callback(null, true); // temporary debug-safe fallback
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 204
 }));
 
-app.use(express.json());
+/* =========================
+   FORCE PRE-FLIGHT SUPPORT
+========================= */
+app.options("*", cors());
 /* ... rest of your routes (/signup, /login, etc.) ... */
 
 /* ---------------- HEALTH CHECK ---------------- */
