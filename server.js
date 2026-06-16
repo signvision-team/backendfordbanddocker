@@ -42,7 +42,7 @@ app.use(cors({
 /* =========================
    FORCE PRE-FLIGHT SUPPORT
 ========================= */
-app.options("*", cors());
+app.options(/.*/, cors());
 /* ... rest of your routes (/signup, /login, etc.) ... */
 
 /* ---------------- HEALTH CHECK ---------------- */
