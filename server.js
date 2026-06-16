@@ -6,6 +6,8 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
+console.log("=== CORS VERSION DEPLOYED ===");
+
 // ✅ THE CORS FIX IS LIVE
 app.use((req, res, next) => {
   const origin = req.headers.origin || "*";
