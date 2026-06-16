@@ -43,7 +43,7 @@ app.use(cors({
    FORCE PRE-FLIGHT SUPPORT
 ========================= */
 // FIXED: Changed from /.*/ RegExp literal to '*' string matching to prevent path-to-regexp crashes
-app.options("*", cors());
+app.options("/*", cors());
 
 /* ---------------- HEALTH CHECK ---------------- */
 app.get("/", (req, res) => {
