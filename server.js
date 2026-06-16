@@ -3,27 +3,24 @@ import dotenv from "dotenv";
 import db from "./db.js";
 
 dotenv.config();
-
 const app = express();
-
-// ✅ 1. Standard body parser
 app.use(express.json());
 
-// ✅ 2. MANUAL HARDCODED CORS MIDDLEWARE (Overrides everything)
+// ✅ THE CORS FIX IS LIVE
 app.use((req, res, next) => {
-  // Echo the requesting origin back or default to allow all
   const origin = req.headers.origin || "*";
   res.setHeader("Access-Control-Allow-Origin", origin);
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("Access-Control-Allow-Credentials", "true");
 
-  // Handle browser OPTIONS Preflight instantly right here
   if (req.method === "OPTIONS") {
     return res.sendStatus(204); 
   }
   next();
 });
+
+/* ... rest of your routes (/signup, /login, etc.) ... */
 
 /* ---------------- HEALTH CHECK ---------------- */
 app.get("/", (req, res) => {
