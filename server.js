@@ -1,32 +1,25 @@
 import express from "express";
 import dotenv from "dotenv";
 import db from "./db.js";
+import cors from "cors";
+
 
 dotenv.config();
 const app = express();
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
 
-  const allowedOrigins = [
+
+app.use(cors({
+  origin: [
     "http://localhost:5173",
     "http://localhost:3000",
     "https://signvision-5mwgcpa5b-wahabullahs-projects.vercel.app"
-  ];
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
 
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
-
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
-
-  next();
-});
+app.use(express.json());
 /* ... rest of your routes (/signup, /login, etc.) ... */
 
 /* ---------------- HEALTH CHECK ---------------- */
