@@ -5,27 +5,28 @@ import db from "./db.js";
 dotenv.config();
 const app = express();
 app.use((req, res, next) => {
-  console.log("REQUEST:", req.method, req.url);
-  next();
-});
-app.use(express.json());
+  const origin = req.headers.origin;
 
-console.log("=== CORS VERSION DEPLOYED ===");
+  const allowedOrigins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://signvision-5mwgcpa5b-wahabullahs-projects.vercel.app"
+  ];
 
-// ✅ THE CORS FIX IS LIVE
-app.use((req, res, next) => {
-  const origin = req.headers.origin || "*";
-  res.setHeader("Access-Control-Allow-Origin", origin);
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("Access-Control-Allow-Credentials", "true");
 
   if (req.method === "OPTIONS") {
-    return res.sendStatus(204); 
+    return res.sendStatus(204);
   }
+
   next();
 });
-
 /* ... rest of your routes (/signup, /login, etc.) ... */
 
 /* ---------------- HEALTH CHECK ---------------- */
